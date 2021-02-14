@@ -109,7 +109,7 @@ class CommentsView extends ItemView {
         if (container) {
             var map = L.map('map', {}).setView([14, -1.8], 5);
 
-            var tile_layer_main = L.tileLayer('app://local/Users/gaby/Desktop/Nehlam/Data/Tiles/{z}/{x}/{y}.png', {
+            var tile_layer_main = L.tileLayer('app://local/Data/Tiles/{z}/{x}/{y}.png', {
                 "attribution": "darakah",
                 "maxNativeZoom": 7,
                 "maxZoom": 10000,
