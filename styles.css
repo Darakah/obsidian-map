@@ -1,0 +1,15 @@
+.leaflet-marker-icon.leaflet-interactive, .leaflet-image-layer.leaflet-interactive, .leaflet-pane > svg path.leaflet-interactive, svg.leaflet-image-layer.leaflet-interactive path{
+	background-color: #95bc59;
+	box-shadow: 0 0 0 2px white, 0 0 10px rgba(0, 0, 0, .35);
+	border-radius: 50%;
+	cursor: move;
+	outline: none;
+	transition: background-color .25s;
+}
+
+path.leaflet-polygon {
+    fill: #b4cd8a;
+    stroke: #50622b;
+    stroke-width: 2;
+    fill-opacity: .75;
+}
