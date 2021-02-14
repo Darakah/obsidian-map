@@ -1,6 +1,8 @@
 import { ItemView, MarkdownView, WorkspaceLeaf, App, View, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import L from 'leaflet';
-import FreeDraw, { CREATE, EDIT, ALL, NONE } from 'leaflet-freedraw';
+import Freedraw, { CREATE, EDIT, ALL, NONE } from 'leaflet-freedraw';
+import FileSaver from 'file-saver';
+import 'leaflet-craft';
 import 'leaflet-measure';
 import 'leaflet-measure/dist/leaflet-measure.css'
 import 'leaflet-draw';
@@ -8,7 +10,6 @@ import 'leaflet-draw/dist/leaflet.draw.css'
 import 'leaflet-draw/dist/leaflet.draw-src.css'
 import 'leaflet-craft';
 import 'leaflet/dist/leaflet.css';
-
 
 interface CommentsSettings {
     SHOW_RIBBON: boolean;
@@ -49,7 +50,7 @@ class CommentsView extends ItemView {
         this.redraw = this.redraw.bind(this);
         this.redraw_debounced = this.redraw_debounced.bind(this);
         //this.containerEl = this.containerEl;
-        //this.containerEl.createDiv({ cls: 'map', attr: { id: 'map'}})
+        this.containerEl.createDiv({ cls: 'map', attr: { id: 'map' } })
     }
 
     getViewType(): string {
@@ -76,21 +77,39 @@ class CommentsView extends ItemView {
         this.redraw();
     }, 1000);
 
+    convertToGeojson(FreeDrawOut) {
+        //{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":
+
+        let geojson = {
+            "type": "FeatureCollection",
+            "features": [
+
+            ]
+        }
+
+        for(let i=0; i < FreeDrawOut.length; i++){
+            // for each separated element from the current drawing
+            // create a feature and append to geojson
+            geojson.features.push(FreeDrawOut[i].toGeoJSON())
+        }
+        return JSON.stringify(geojson);
+    }
+
     async redraw() {
 
-        var container = document.getElementsByClassName('view-content')[0].createDiv({
+        var container = document.getElementsByClassName('map')[0].createDiv({
             cls: 'map', attr: {
                 id: 'map',
                 style: 'position:absolute; top:0px; right:0px; height:100%; width:100%;'
             }
         })
-        document.getElementsByClassName('view-content')[0].setAttribute('style', 'position:absolute; top:0px; right:0px; height:100%; width:100%;')
+        document.getElementsByClassName('map')[0].setAttribute('style', 'position:absolute; top:0px; right:0px; height:100%; width:100%;')
 
         let draw, view;
         if (container) {
-            var map = L.map('map', { measureControl: true }).setView([14, -1.8], 5);
+            var map = L.map('map', {}).setView([14, -1.8], 5);
 
-            var tile_layer_main = L.tileLayer('app://local/Data/Tiles/{z}/{x}/{y}.png', {
+            var tile_layer_main = L.tileLayer('app://local/Users/gaby/Desktop/Nehlam/Data/Tiles/{z}/{x}/{y}.png', {
                 "attribution": "darakah",
                 "maxNativeZoom": 7,
                 "maxZoom": 10000,
@@ -148,29 +167,82 @@ class CommentsView extends ItemView {
             });
             measure_control_main.addTo(map);
 
-            var drawnItems = new L.FeatureGroup();
+            const freeDraw = new Freedraw({ mode: NONE, smoothFactor: 0.1, elbowDistance: 2, simplifyFactor: 0.1, strokeWidth: 1 });
+            map.addLayer(freeDraw);
+
+            let drawControl = L.control({ position: 'topright' });
+            drawControl.onAdd = function (map) {
+                var div = L.DomUtil.create('div', 'FreeDrawControl');
+                div.innerHTML = `<div class="leaflet-control-layers leaflet-control-layers-expanded">
+                                    <form>
+                                    <input class="leaflet-control-layers-overlays" id="FreeDrawControl" type="checkbox">
+                                        Draw
+                                    </input>
+                                    </form>
+                                </div>`;
+                return div;
+            };
+            drawControl.addTo(map);
+            document.getElementById("FreeDrawControl").addEventListener("click", () => {
+                if (freeDraw.mode() === 0) {
+                    map.addLayer(freeDraw)
+                    freeDraw.mode(15);
+                } else {
+                    freeDraw.mode(0)
+                    map.removeLayer(freeDraw)
+                }
+            });
+
+            let freeEdit = L.control({ position: 'topright' });
+            freeEdit.onAdd = function (map) {
+                var div = L.DomUtil.create('div', 'freeEdit');
+                div.innerHTML = `<div class="leaflet-control-layers leaflet-control-layers-expanded">
+                                    <form>
+                                    <input class="leaflet-control-layers-overlays" id="freeEdit" type="checkbox">
+                                        Edit
+                                    </input>
+                                    </form>
+                                </div>`;
+                return div;
+            };
+            freeEdit.addTo(map);
+            document.getElementById("freeEdit").addEventListener("click", () => {
+                if (freeDraw.mode() === 15) {
+                    freeDraw.mode(2);
+                } else {
+                    freeDraw.mode(15)
+                }
+            });
+
+            let ExportControl = L.control({ position: 'topright' });
+            ExportControl.onAdd = function (map) {
+                let div = L.DomUtil.create('div', 'ExportControl');
+                div.innerHTML = `<div class="leaflet-control-layers leaflet-control-layers-expanded">
+                                    <form>
+                                    <input class="leaflet-control-layers-overlays" id="ExportControl" type="checkbox">
+                                        Export
+                                    </input>
+                                    </form>
+                                </div>`;
+                return div;
+            };
+            ExportControl.addTo(map);
+            document.getElementById("ExportControl").addEventListener("click", () => {
+                if (freeDraw.mode() != 0) {
+                    let blob = new Blob([JSON.stringify(JSON.parse(this.convertToGeojson(freeDraw.all())),null,2)], {type: "text/plain;charset=utf-8"});
+                    FileSaver.saveAs(blob, "ThisIsMeFile.geojson");
+                    freeDraw.clear();
+                }
+            });
+
+            let drawnItems = new L.FeatureGroup();
             map.addLayer(drawnItems);
-            var drawControl = new L.Control.Draw({
+            let drawControlBase = new L.Control.Draw({
                 edit: {
                     featureGroup: drawnItems
                 }
             }).addTo(map);
 
-            const freeDraw = new FreeDraw({ mode: 0, leaveModeAfterCreate: true});
-            map.addLayer(freeDraw);
-
-            document.addEventListener('keydown', (e) => {
-                if(e.key == 'e'){
-                    freeDraw.mode(ALL)
-                }
-              });
-            
-            document.addEventListener('keydown', (e) => {
-                if(e.key == 'r'){
-                    freeDraw.mode(0)
-                    console.log(freeDraw)
-                }
-            });
         }
     }
 }
@@ -205,8 +277,7 @@ export default class CommentsPlugin extends Plugin {
     }
 
     showPanel = function () {
-        this.app.workspace.getRightLeaf(true)
-            .setViewState({ type: VIEW_TYPE_OB_COMMENTS });
+        this.app.workspace.getLeaf().setViewState({ type: VIEW_TYPE_OB_COMMENTS })
     }
 
     onunload() {
