@@ -8,3 +8,13 @@ Use leaflet to generate an interactive map with all geo / temporal tagged notes 
 
 ## To-Do:
 
+- [ ] Define and implement the following display categories:
+* Roads: main-roads, side-roads
+* Cities
+* Towns
+* Political Borders
+* Castles
+
+- [ ] Define Zoom level for appearance to each of the categories
+- [ ] Define graphic representation for each of the categories
+- [ ] Add pop-up with information to each of the categories upon interaction
