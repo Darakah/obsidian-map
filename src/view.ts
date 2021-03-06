@@ -145,7 +145,7 @@ export class WorldMapView extends ItemView {
         if (container) {
             map = L.map('map', {}).setView([14, -1.8], 5);
 
-            var tile_layer_main = L.tileLayer('app://local/Users/gaby/Desktop/Nehlam/Data/Tiles/{z}/{x}/{y}.png', {
+            var tile_layer_main = L.tileLayer('app://local/Users/Tiles/{z}/{x}/{y}.png', {
                 "attribution": "darakah",
                 "maxNativeZoom": 7,
                 "maxZoom": 10000,
