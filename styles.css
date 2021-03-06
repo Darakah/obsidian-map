@@ -1,10 +1,49 @@
-.leaflet-marker-icon.leaflet-interactive, .leaflet-image-layer.leaflet-interactive, .leaflet-pane > svg path.leaflet-interactive, svg.leaflet-image-layer.leaflet-interactive path{
-	background-color: #95bc59;
-	box-shadow: 0 0 0 2px white, 0 0 10px rgba(0, 0, 0, .35);
-	border-radius: 50%;
-	cursor: move;
-	outline: none;
-	transition: background-color .25s;
+.ob-world-map {
+    display: none;
+}
+
+.rangeSlider .rangeHandle.active .rangeNub {
+    background-color: hsl(46, 77%, 76%) !important;
+    background-color: hsl(46, 77%, 76%) !important;
+}
+
+.ob-world-map-update-button {
+    margin-left: 215px;
+    margin-right: 10px;
+    margin-top: 10px;
+    right: 20px;
+    background-color: var(--background-secondary-alt);
+    border: none;
+    border-radius: 7px;
+    height: auto;
+    font-family: "Comic Sans MS" !important;
+    font-size: 15px !important;
+}
+
+.ob-world-map-update-button:hover {
+    top: -2px;
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+    box-shadow: none;
+    background-color: var(--background-secondary-alt);
+    color: var(--text-title-h4);
+    font-weight: 700;
+}
+
+.leaflet-control-measure .leaflet-control-measure-interaction {
+    padding: 5px 6px;
+}
+
+.leaflet-div-icon {
+    background: #b4cd8a;
+    fill: #b4cd8a;
+    stroke: #50622b;
+    stroke-width: 2;
+    fill-opacity: .75;
 }
 
 path.leaflet-polygon {
