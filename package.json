@@ -1,6 +1,6 @@
 {
     "name": "Map",
-    "version": "0.0.1",
+    "version": "0.2.0",
     "description": "Interactive leaflet map to render geo/time tagged notes.",
     "main": "./src/main.js",
     "scripts": {
