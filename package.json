@@ -1,6 +1,6 @@
 {
     "name": "Map",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Interactive leaflet map to render geo/time tagged notes.",
     "main": "./src/main.js",
     "scripts": {
@@ -26,9 +26,10 @@
         "@geoman-io/leaflet-geoman-free": "^2.9.0",
         "carbon-components-svelte": "^0.29.2",
         "file-saver": "^2.0.5",
+        "font-awesome": "^4.7.0",
+        "framework7-svelte": "^6.0.12",
         "geojson": "^0.5.0",
         "leaflet": "^1.7.1",
-        "leaflet-craft": "^4.1.7",
         "leaflet-draw": "^1.0.4",
         "leaflet-freedraw": "^2.13.3",
         "leaflet-measure": "^3.1.0",

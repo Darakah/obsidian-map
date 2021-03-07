@@ -1,11 +1,11 @@
-import { ItemView, WorkspaceLeaf, App, TFile, MetadataCache, Vault } from 'obsidian';
-import WorldMapPlugin from './main'
-import WorldMapControl from './svelte/WorldMapControl.svelte'
-import { debounce, getMapData, updateMap, getTypes, getTags, getYear, filterNotes, getFileGeoData } from './utils'
-import { DEFAULT_SETTINGS, VIEW_TYPE_OB_MAP_CONTROL, VIEW_TYPE_OB_WORLD_MAP } from './constants'
+import { ItemView, WorkspaceLeaf } from 'obsidian';
+import MapControlButton from './svelte/MapControlButton.svelte'
+import { convertToGeojson, updateMap } from './utils'
+import { VIEW_TYPE_OB_WORLD_MAP } from './constants'
+import type { LatLng } from "leaflet";
 import L from 'leaflet'
 
-import Freedraw, { CREATE, EDIT, ALL, NONE } from 'leaflet-freedraw';
+import Freedraw, { CREATE, EDIT, NONE } from 'leaflet-freedraw';
 import FileSaver from 'file-saver';
 import 'leaflet-measure';
 import 'leaflet-measure/dist/leaflet-measure.css'
@@ -13,80 +13,21 @@ import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css'
 import 'leaflet-draw/dist/leaflet.draw-src.css'
 import 'leaflet/dist/leaflet.css';
-
-
+import 'font-awesome/css/font-awesome.min.css'
+import MapPaint from '../MapPaint.js'
+import WorldMapPlugin from './main'
+import type { overlayTile, coordBounds } from './types'
 
 var map;
 
-export class WorldMapControlView extends ItemView {
+export class WorldMapView extends ItemView {
     plugin: WorldMapPlugin;
 
-    constructor(leaf: WorkspaceLeaf, app: App, plugin: WorldMapPlugin) {
+    constructor(leaf: WorkspaceLeaf, plugin: WorldMapPlugin) {
         super(leaf);
-        this.redraw = this.redraw.bind(this);
-        this.app = app;
         this.plugin = plugin;
-        this.containerEl = this.containerEl;
-        this.registerEvent(this.app.workspace.on("layout-ready", this.redraw));
-        this.registerEvent(this.app.workspace.on("file-open", this.redraw));
-        this.registerEvent(this.app.workspace.on("quick-preview", this.redraw));
-    }
-
-    getViewType(): string {
-        return VIEW_TYPE_OB_MAP_CONTROL;
-    }
-
-    getDisplayText(): string {
-        return "World Map";
-    }
-
-    getIcon(): string {
-        return "lines-of-text";
-    }
-
-    onClose(): Promise<void> {
-        return Promise.resolve();
-    }
-
-    async onOpen(): Promise<void> {
-        this.redraw();
-    }
-
-    async redraw() {
-        this.containerEl.empty();
-        this.containerEl.createDiv({ cls: 'WorldMapControl', attr: { id: 'WorldMapControl' } })
-
-        new WorldMapControl({
-            target: this.containerEl
-        })
-
-        let updateButtonEl = this.containerEl.createEl('button', { cls: 'ob-world-map-update-button', text: 'Filter' }) //.setText('Filter')
-        updateButtonEl.addEventListener("click", event => {
-            // get geo data for the specific parameters
-            //let geoData;
-            updateMap(this.app.vault.getMarkdownFiles(), this.app.metadataCache, this.app.vault, map)
-            //console.log(geoData)
-
-            /*for(let i=0; i < geoData.length; i++){
-                var marker = L.circle([geoData[i], -0.11], {
-                    color: 'red',
-                    fillColor: '#f03',
-                    fillOpacity: 0.5,
-                    radius: 500
-                }).addTo(map);
-            }*/
-        });
-    }
-}
-
-
-export class WorldMapView extends ItemView {
-
-    constructor(leaf: WorkspaceLeaf) {
-        super(leaf);
         this.redraw = this.redraw.bind(this);
-        this.redraw_debounced = this.redraw_debounced.bind(this);
-        this.containerEl.createDiv({ cls: 'map', attr: { id: 'map' } })
+        this.registerEvent(this.app.workspace.on("file-open", this.redraw));
     }
 
     getViewType(): string {
@@ -109,43 +50,29 @@ export class WorldMapView extends ItemView {
         this.redraw();
     }
 
-    redraw_debounced = debounce(function () {
-        this.redraw();
-    }, 1000);
-
-    convertToGeojson(FreeDrawOut) {
-        //{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":
-
-        let geojson = {
-            "type": "FeatureCollection",
-            "features": [
-
-            ]
-        }
-
-        for (let i = 0; i < FreeDrawOut.length; i++) {
-            // for each separated element from the current drawing
-            // create a feature and append to geojson
-            geojson.features.push(FreeDrawOut[i].toGeoJSON())
-        }
-        return JSON.stringify(geojson);
-    }
-
     async redraw() {
 
-        var container = document.getElementsByClassName('map')[0].createDiv({
-            cls: 'map', attr: {
-                id: 'map',
-                style: 'position:absolute; top:0px; right:0px; height:100%; width:100%;'
-            }
-        })
-        document.getElementsByClassName('map')[0].setAttribute('style', 'position:absolute; top:0px; right:0px; height:100%; width:100%;')
+        // Create div with map element
+        this.containerEl.createDiv({ cls: 'map', attr: { id: 'map' } })
+        let mapEl = document.getElementsByClassName('map');
 
-        let draw, view;
-        if (container) {
+        // Verify if map element available
+        if (mapEl[0]) {
+
+            // create div to contain map
+            mapEl[0].createDiv({
+                cls: 'map', attr: {
+                    id: 'map',
+                    style: 'position:absolute; top:0px; right:0px; height:100%; width:100%;'
+                }
+            })
+            mapEl[0].setAttribute('style', 'position:absolute; top:0px; right:0px; height:100%; width:100%;')
+
+            // Create the map and set view to center on default zoom
             map = L.map('map', {}).setView([14, -1.8], 5);
 
-            var tile_layer_main = L.tileLayer('app://local/Users/Tiles/{z}/{x}/{y}.png', {
+            // Add firt tile layer
+            let baseLayer = L.tileLayer('app://local/Users/gaby/Desktop/Nehlam/Data/Tiles/{z}/{x}/{y}.png', {
                 "attribution": "darakah",
                 "maxNativeZoom": 7,
                 "maxZoom": 10000,
@@ -154,7 +81,8 @@ export class WorldMapView extends ItemView {
                 "zoomStart": 5
             }).addTo(map);
 
-            var measure_control_main = new L.Control.Measure(
+            // Add area / distance measurement plugin
+            let measure_control_main = new L.Control.Measure(
                 {
                     "position": "topleft",
                     "primaryLengthUnit": "Nu",
@@ -203,23 +131,82 @@ export class WorldMapView extends ItemView {
             });
             measure_control_main.addTo(map);
 
+            // Add feature groups
+            let cities = L.layerGroup();
+            let dungeons = L.featureGroup({});
+            let assassinGuild = L.featureGroup({});
+            let magicalForest = L.featureGroup({});
+            let remains = L.featureGroup({});
+            let herbalistShop = L.featureGroup({});
+            let potionShop = L.featureGroup({});
+            let blacksmith = L.featureGroup({});
+            let artificer = L.featureGroup({});
+            let adventurerGuild = L.featureGroup({});
+            let warriorGuild = L.featureGroup({});
+
+            let overlayMaps = {
+                "Cities": cities,
+                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Dungeon.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Dungeon": dungeons,
+                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Assassins_Guild.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Assassin Guild": assassinGuild,
+                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Magical_Forest.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Magical Forest": magicalForest,
+                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Remains.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Remains": remains,
+                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Herbalist_Shop_2.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Herbalist Shop": herbalistShop,
+                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Potion_Shop.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Potion Shop": potionShop,
+                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Blacksmith_Shop.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Blacksmith": blacksmith,
+                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Artificer_Shop_1.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Artificer": artificer,
+                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Adventurer_Guild.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Adventurer Guild": adventurerGuild,
+                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Warrior_Guild.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Warrior Guild": warriorGuild
+            };
+
+            L.control.layers(null, overlayMaps, { "autoZIndex": true, "collapsed": true, "position": "bottomleft" }).addTo(map);
+
+
+            map.on('zoomend', function () {
+                var zoomlevel = map.getZoom();
+                if (zoomlevel < 5) {
+                    if (map.hasLayer(cities)) {
+                        map.removeLayer(cities);
+                    } else {
+                        console.log("no point layer active");
+                    }
+                }
+                if (zoomlevel >= 5) {
+                    if (map.hasLayer(cities)) {
+                        console.log("layer already added");
+                    } else {
+                        map.addLayer(cities);
+                    }
+                }
+                console.log("Current Zoom Level =" + zoomlevel)
+            });
+
+            // Create Map Control Panel
+            let controlPanel = document.createElement('div')
+            controlPanel.addClass('WorldMapControl')
+            controlPanel.setAttribute('id', 'WorldMapControl')
+            controlPanel.setAttribute('style', '')
+
+            new MapControlButton({
+                target: controlPanel
+            })
+
+            let mapControl = L.control({ position: 'topright' });
+            mapControl.onAdd = function (map) {
+                return controlPanel;
+            };
+
+            // Add Listener to filter button to update map data
+            let updateButtonEl = controlPanel.getElementsByClassName('ob-world-map-update-button')[0]
+            updateButtonEl.addEventListener("click", event => {
+                updateMap(this.app.vault.getMarkdownFiles(), this.app.metadataCache, this.app.vault, map, overlayMaps)
+            });
+
+            // Add freeDraw plugin
             const freeDraw = new Freedraw({ mode: NONE, smoothFactor: 0.05, elbowDistance: 2, simplifyFactor: 0.05, strokeWidth: 1 });
             map.addLayer(freeDraw);
 
-            let drawControl = L.control({ position: 'topright' });
-            drawControl.onAdd = function (map) {
-                var div = L.DomUtil.create('div', 'FreeDrawControl');
-                div.innerHTML = `<div class="leaflet-control-layers leaflet-control-layers-expanded">
-                                    <form>
-                                    <input class="leaflet-control-layers-overlays" id="FreeDrawControl" type="checkbox">
-                                        Draw
-                                    </input>
-                                    </form>
-                                </div>`;
-                return div;
-            };
-            drawControl.addTo(map);
-            document.getElementById("FreeDrawControl").addEventListener("click", () => {
+            // Listeners to control freDraw states
+            controlPanel.getElementsByClassName("FreeDrawControl")[0].addEventListener("click", () => {
                 if (freeDraw.mode() === 0) {
                     map.addLayer(freeDraw)
                     freeDraw.mode(15);
@@ -229,20 +216,11 @@ export class WorldMapView extends ItemView {
                 }
             });
 
-            let freeEdit = L.control({ position: 'topright' });
-            freeEdit.onAdd = function (map) {
-                var div = L.DomUtil.create('div', 'freeEdit');
-                div.innerHTML = `<div class="leaflet-control-layers leaflet-control-layers-expanded">
-                                    <form>
-                                    <input class="leaflet-control-layers-overlays" id="freeEdit" type="checkbox">
-                                        Edit
-                                    </input>
-                                    </form>
-                                </div>`;
-                return div;
-            };
-            freeEdit.addTo(map);
-            document.getElementById("freeEdit").addEventListener("click", () => {
+            controlPanel.getElementsByClassName("freeEdit")[0].addEventListener("click", () => {
+                if (!map.hasLayer(freeDraw)) {
+                    return;
+                }
+
                 if (freeDraw.mode() === 15) {
                     freeDraw.mode(2);
                 } else {
@@ -250,35 +228,97 @@ export class WorldMapView extends ItemView {
                 }
             });
 
-            let ExportControl = L.control({ position: 'topright' });
-            ExportControl.onAdd = function (map) {
+            // Add Export button for both freeDraw & Draw plugins
+            let ExportDraw = L.control({ position: 'bottomright' });
+            ExportDraw.onAdd = function (map) {
                 let div = L.DomUtil.create('div', 'ExportControl');
-                div.innerHTML = `<div class="leaflet-control-layers leaflet-control-layers-expanded">
-                                    <form>
-                                    <input class="leaflet-control-layers-overlays" id="ExportControl" type="checkbox">
-                                        Export
-                                    </input>
-                                    </form>
-                                </div>`;
+                div.innerHTML = `<button style="padding: 10px; position: fixed; bottom: 20px; right: 0px;" ><i class="fa fa-download" id="exportGeo" ></i></button>`;
                 return div;
             };
-            ExportControl.addTo(map);
+            ExportDraw.addTo(map);
 
-            document.getElementById("ExportControl").addEventListener("click", () => {
-                if (freeDraw.mode() != 0) {
-                    let blob = new Blob([JSON.stringify(JSON.parse(this.convertToGeojson(freeDraw.all())), null, 2)], { type: "text/plain;charset=utf-8" });
-                    FileSaver.saveAs(blob, "ThisIsMeFile.geojson");
-                    freeDraw.clear();
-                }
+            // Add Draw plugin
+            let options = {
+                position: "topleft",
+                draw: { "circle": false, "marker": false, "polyline": { "allowIntersection": true } },
+                edit: {
+                    "poly": { "allowIntersection": true },
+                    "featureGroup": L.featureGroup(),
+                },
+            }
+
+            let drawnItems = new L.featureGroup().addTo(
+                map
+            );
+
+            options.edit.featureGroup = drawnItems;
+            new L.Control.Draw(
+                options
+            ).addTo(map);
+            map.on(L.Draw.Event.CREATED, function (e) {
+                let layer = e.layer,
+                    type = e.layerType;
+                let coords = JSON.stringify(layer.toGeoJSON());
+                layer.on('click', function () {
+                    alert(coords);
+                    console.log(coords);
+                });
+                drawnItems.addLayer(layer);
+            });
+            map.on('draw:created', function (e) {
+                drawnItems.addLayer(e.layer);
             });
 
-            let drawnItems = new L.FeatureGroup();
-            map.addLayer(drawnItems);
-            let drawControlBase = new L.Control.Draw({
-                edit: {
-                    featureGroup: drawnItems
+            // Data export function for both freeDraw & Draw plugins
+            document.getElementById('exportGeo').onclick = function (e) {
+                if (freeDraw.mode() != 0) {
+                    let blob = new Blob([JSON.stringify(JSON.parse(convertToGeojson(freeDraw.all())), null, 2)], { type: "text/plain;charset=utf-8" });
+                    FileSaver.saveAs(blob, "ThisIsMeFile.geojson");
+                    freeDraw.clear();
+                } else {
+                    let data = drawnItems.toGeoJSON();
+                    let convertedData = 'text/json;charset=utf-8,'
+                        + encodeURIComponent(JSON.stringify(data));
+                    console.log(convertedData);
+                    document.getElementById('exportGeo').setAttribute(
+                        'href', 'data:' + convertedData
+                    );
+                    document.getElementById('exportGeo').setAttribute(
+                        'download', "my_data.geojson"
+                    );
                 }
-            }).addTo(map);
+            }
+
+            mapControl.addTo(map);
+
+            // Add leaflet Map Paint plugin
+            let mapPaint = new MapPaint.SwitchControl({ position: 'topleft' })
+            map.addControl(mapPaint);
+
+            for (let i = 0; i < this.plugin.settings.overlayData.length; i++) {
+                let coord = this.plugin.settings.overlayData[i].bounds;
+                L.imageOverlay(this.plugin.settings.overlayData[i].image,
+                    [[coord.northEast.lat, coord.northEast.lng], [coord.southWest.lat, coord.southWest.lng]]).addTo(map);
+            }
+
+            map.MapPaint.saveMethod = (image: string, bounds) => {
+
+                let northEast = bounds.getNorthEast();
+                let southWest = bounds.getSouthWest();
+
+                let drawData = {
+                    image: image,
+                    bounds: { northEast: northEast, southWest: southWest },
+                    zoom: parseInt(map.getZoom())
+                }
+
+                this.plugin.settings.overlayData.push(drawData)
+                this.plugin.saveSettings()
+
+                L.imageOverlay(image, [[northEast.lat, northEast.lng], [southWest.lat, southWest.lng]]).addTo(map);
+
+            }
+
         }
     }
 }

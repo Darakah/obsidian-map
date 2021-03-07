@@ -1,7 +1,7 @@
 import { View, Plugin } from 'obsidian';
-import { DEFAULT_SETTINGS, VIEW_TYPE_OB_MAP_CONTROL, VIEW_TYPE_OB_WORLD_MAP } from './constants'
+import { DEFAULT_SETTINGS, VIEW_TYPE_OB_WORLD_MAP } from './constants'
 import { WorldMapSettings } from './types'
-import { WorldMapView, WorldMapControlView } from './view'
+import { WorldMapView } from './view'
 import MapSettingTab from './settings'
 
 export default class WorldMapPlugin extends Plugin {
@@ -15,8 +15,8 @@ export default class WorldMapPlugin extends Plugin {
         console.log('Loaded World Map Plugin');
         this.addSettingTab(new MapSettingTab(this.app, this));
 
-        this.registerView(VIEW_TYPE_OB_WORLD_MAP, (leaf) => this.view = new WorldMapView(leaf));
-        this.registerView(VIEW_TYPE_OB_MAP_CONTROL, (leaf) => this.view = new WorldMapControlView(leaf, this.app, this));
+        this.registerView(VIEW_TYPE_OB_WORLD_MAP, (leaf) => this.view = new WorldMapView(leaf, this));
+
         this.addCommand({
             id: "show-world-map-panel",
             name: "Open World Map Control Panel",
@@ -26,8 +26,6 @@ export default class WorldMapPlugin extends Plugin {
 
     showPanel = function () {
         this.app.workspace.getLeaf().setViewState({ type: VIEW_TYPE_OB_WORLD_MAP })
-        this.app.workspace.getRightLeaf(true)
-            .setViewState({ type: VIEW_TYPE_OB_MAP_CONTROL });
     }
 
     onunload() {

@@ -40,10 +40,27 @@
 
 .leaflet-div-icon {
     background: #b4cd8a;
+    border-radius: 20px;
     fill: #b4cd8a;
     stroke: #50622b;
     stroke-width: 2;
     fill-opacity: .75;
+}
+
+#export {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    z-index: 999;
+    background: white;
+    color: black;
+    padding: 6px;
+    border-radius: 4px;
+    font-family: 'Helvetica Neue';
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: none;
+    top: 90px;
 }
 
 path.leaflet-polygon {
@@ -51,4 +68,339 @@ path.leaflet-polygon {
     stroke: #50622b;
     stroke-width: 2;
     fill-opacity: .75;
+}
+
+.mapControl:hover>.testHidden {
+    display: block;
+    background-color: red;
+}
+
+.map-control-panel {
+    height: 500px;
+    width: 100px;
+    margin-left: -100px;
+    position: relative;
+    float: right;
+    z-index: 2;
+    background-color: rgba(255, 50, 50, 0.5);
+    pointer-events: auto;
+}
+
+.ob-map-control-button {
+    position: relative;
+    border-bottom: 1px dotted black;
+    color: var(--bright-orange);
+    font-weight: bold;
+    background-color: var(--background-secondary-alt);
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.ob-map-control-button:hover {
+    background-color: var(--background-secondary);
+}
+
+.ob-map-control-button span {
+    visibility: hidden;
+    min-width: auto;
+    max-width: 500px;
+    width: max-content;
+    background-color: var(--background-secondary-alt);
+    color: var(--text-title-h4);
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px 10px;
+    z-index: 1;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    box-shadow: 1px 1px 10px 5px var(--background-secondary);
+    transition: opacity 1s;
+}
+
+.ob-map-control-button input {
+    display: none;
+}
+
+.ob-map-control-button input:checked+span {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+/* Map Paint CSS */
+
+#mappaint-map {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+}
+
+canvas.mappaint-canvas {
+    cursor: crosshair;
+    position: absolute;
+    z-index: 999;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+}
+
+#mappaint-colors {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+#mappaint-colors div {
+    width: 3em;
+    height: 3em;
+}
+
+.mappaint-color,
+.mappaint-eraser {
+    width: 1em !important;
+    height: 1em !important;
+}
+
+.mappaint-control {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.mappaint-control>div {
+    background: rgba(255, 255, 255, 0.66);
+    border-radius: 4px;
+    padding: 4px;
+    width: 230px;
+    /*display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: space-between;*/
+    position: relative;
+    z-index: 3;
+}
+
+.leaflet-left .mappaint-control>div {
+    width: auto;
+}
+
+.mappaint-control>div>* {
+    display: inline-block;
+}
+
+.mappaint-color {
+    margin: 0.4em;
+    width: 3em;
+    height: 3em;
+    border-radius: 50% 43%;
+    /*box-shadow: -1px -1px 6px rgba(0, 0, 0, 0.55) inset, 0px 0px 3px rgba(0,0,0,0.3);*/
+    box-shadow: -3px -4px 0px 0px rgba(0, 0, 0, 0.35) inset, 2px 2px 0px 0px rgba(255, 255, 255, 0.3) inset;
+    cursor: pointer;
+    /*flex-shrink: 0;*/
+}
+
+.mappaint-eraser {
+    width: 32px !important;
+    height: 20px !important;
+}
+
+.mappaint-color.selected {
+    box-shadow: 3px 4px 0px 0px rgba(0, 0, 0, 0.52) inset, -2px -2px 0px 0px rgba(255, 255, 255, 0.35) inset;
+}
+
+.mappaint-color:hover,
+.mappaint-eraser:hover {
+    box-shadow: -3px -4px 0px 0px rgba(0, 0, 0, 0.55) inset, 2px 2px 0px 0px rgba(255, 255, 255, 0.5) inset;
+}
+
+.mappaint-color.selected:hover {
+    box-shadow: 3px 4px 0px 0px rgba(0, 0, 0, 0.65) inset, -2px -2px 0px 0px rgba(255, 255, 255, 0.5) inset;
+}
+
+.mappaint-eraser {
+    text-align: center;
+    background: -webkit-linear-gradient(left, #5981D8 39%, rgb(255, 0, 61) 39%);
+    background: -moz-linear-gradient(left, #5981D8 39%, rgb(255, 0, 61) 39%);
+    background: linear-gradient(left, #5981D8 39%, rgb(255, 0, 61) 39%);
+    border-radius: 20% 30%;
+    height: 20px;
+    -webkit-transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+    margin-top: 0px;
+    /* margin-bottom: 1em; */
+    width: 32px;
+    position: relative;
+    top: 10px;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.mappaint-eraser.selected {
+    background: -webkit-linear-gradient(left, #4369BB 39%, rgb(255, 6, 6) 39%);
+    background: -moz-linear-gradient(left, #4369BB 39%, rgb(255, 6, 6) 39%);
+    background: linear-gradient(left, #4369BB 39%, rgb(255, 6, 6) 39%);
+}
+
+.mappaint-eraser:hover {
+    color: #880e4f;
+}
+
+.leaflet-mappaint {
+    background: white;
+}
+
+.leaflet-mappaint button {
+    padding: 1em;
+    padding: 20px;
+    -webkit-appearance: none;
+}
+
+.mappaint-filler {
+    cursor: pointer;
+    height: 25px;
+    width: 25px;
+    background: #2C4E74;
+    margin-top: 8px;
+    margin-left: 9px;
+    margin-bottom: 15px;
+    border-radius: 3px;
+    box-shadow: 1px 1px 0px 2px rgba(0, 0, 0, 0.13) inset;
+    flex-shrink: 0;
+    margin-right: 11px;
+}
+
+.mappaint-filler:after {
+    content: "\00a0";
+    height: 25px;
+    width: 25px;
+    background: #FF2400;
+    border-radius: 50%;
+    display: block;
+    position: relative;
+    top: 8px;
+    left: 8px;
+    box-shadow: 1px 1px 0px 2px rgba(255, 255, 255, 0.3) inset;
+}
+
+.mappaint-filler.enabled:after {
+    z-index: -1;
+}
+
+.mappaint-control .action-button-save {
+    background: rgb(95, 98, 100);
+    border: 0;
+    width: 60px;
+    border-radius: 4px;
+    color: white;
+    box-shadow: -2px -2px 0 1px rgba(0, 0, 0, 0.5) inset;
+    height: 36px;
+    margin: 2px;
+    padding: 4px;
+}
+
+.mappaint-control .action-button-save:active {
+    background: rgb(82, 84, 86);
+    box-shadow: 2px 2px 0 1px rgba(0, 0, 0, 0.5) inset;
+}
+
+.mappaint-pencil {
+    margin: 2px;
+    background: white;
+    text-align: center;
+    padding: 4px 14px 4px 32px;
+    border-radius: 4px;
+    height: 28px;
+    line-height: 28px;
+    /*min-width: 48px;*/
+    box-shadow: -2px -1px 0px 1px rgba(0, 0, 0, 0.1) inset;
+    cursor: pointer;
+}
+
+.mappaint-pencil.selected {
+    background-color: rgb(240, 240, 240);
+}
+
+@media screen and (max-width: 800px) {
+    .leaflet-right .mappaint-control {
+        margin-top: 70px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .leaflet-right .mappaint-control {
+        margin-top: 110px;
+    }
+}
+
+
+/* material design icons */
+
+.mappaint-uglyfeltpen,
+.mappaint-crayonpencil,
+.mappaint-proceduralpencil {
+    background: grey url("https://raw.githubusercontent.com/Darakah/obsidian-map/main/icons/ic_edit_black_24dp.png") no-repeat 4px center;
+}
+
+.mappaint-circlespencil {
+    background: grey url("https://raw.githubusercontent.com/Darakah/obsidian-map/main/icons/ic_grain_black_24dp.png") no-repeat 4px center;
+}
+
+.mappaint-stripespencil {
+    background: grey url("https://raw.githubusercontent.com/Darakah/obsidian-map/main/icons/ic_texture_black_24dp.png") no-repeat 4px center;
+}
+
+.mappaint-switch {
+    background-color: white !important;
+    cursor: pointer;
+    height: 28px;
+    width: 28px;
+    background: grey url("https://raw.githubusercontent.com/Darakah/obsidian-map/main/icons/ic_edit_black_24dp.png") no-repeat center center;
+}
+
+.mappaint-switch.enabled {
+    background: grey url("https://raw.githubusercontent.com/Darakah/obsidian-map/main/icons/ic_close_black_24dp.png") no-repeat center center;
+}
+
+.mappaint-color-palette {
+    width: max-content !important;
+    background-color: transparent !important;
+    position: fixed;
+    top: 0px;
+    right: 15%;
+}
+
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+    .mappaint-uglyfeltpen,
+    .mappaint-crayonpencil,
+    .mappaint-proceduralpencil {
+        background-color: grey;
+        background-image: url("https://raw.githubusercontent.com/Darakah/obsidian-map/main/icons/ic_edit_black_48dp.png");
+        background-size: 24px 24px;
+    }
+    .mappaint-circlespencil {
+        background-image: url("https://raw.githubusercontent.com/Darakah/obsidian-map/main/icons/ic_grain_black_48dp.png");
+        background-size: 24px 24px;
+    }
+    .mappaint-stripespencil {
+        background-image: url("https://raw.githubusercontent.com/Darakah/obsidian-map/main/icons/ic_texture_black_48dp.png");
+        background-size: 24px 24px;
+    }
+    .mappaint-switch {
+        background-image: url("https://raw.githubusercontent.com/Darakah/obsidian-map/main/icons/ic_edit_black_48dp.png");
+        background-size: 24px 24px;
+    }
+    .mappaint-switch.enabled {
+        background-image: url("https://raw.githubusercontent.com/Darakah/obsidian-map/main/icons/ic_close_black_48dp.png");
+        background-size: 24px 24px;
+    }
 }

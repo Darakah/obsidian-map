@@ -166,64 +166,32 @@ export async function getMapData(fileList: TFile[], vaultCache: MetadataCache, v
     return geoData;
 }
 
-export async function updateMap(fileList: TFile[], vaultCache: MetadataCache, vault: Vault, leafletMap: any) {
+export async function updateMap(fileList: TFile[], vaultCache: MetadataCache, vault: Vault, leafletMap: any, overlayMaps: any) {
     let geoData = await getMapData(fileList, vaultCache, vault)
     console.log(geoData)
 
-    let cities = L.layerGroup();
-
     for (let i = 0; i < geoData.length; i++) {
-        var marker = L.circle([geoData[i].lat, geoData[i].long], {
+        let marker = L.circle([geoData[i].lat, geoData[i].long], {
             color: 'red',
             fillColor: '#f03',
             fillOpacity: 0.5,
             radius: 500
-        }).addTo(cities);
+        }).addTo(overlayMaps.Cities);
+    }
+}
+
+export function convertToGeojson(FreeDrawOut) {
+    let geojson = {
+        "type": "FeatureCollection",
+        "features": [
+
+        ]
     }
 
-    let dungeons = L.featureGroup({});
-    let assassinGuild = L.featureGroup({});
-    let magicalForest = L.featureGroup({});
-    let remains = L.featureGroup({});
-    let herbalistShop = L.featureGroup({});
-    let potionShop = L.featureGroup({});
-    let blacksmith = L.featureGroup({});
-    let artificer = L.featureGroup({});
-    let adventurerGuild = L.featureGroup({});
-    let warriorGuild = L.featureGroup({});
-
-    let overlayMaps = {
-        "Cities": cities,
-        "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Dungeon.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Dungeon": dungeons,
-        "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Assassins_Guild.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Assassin Guild": assassinGuild,
-        "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Magical_Forest.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Magical Forest": magicalForest,
-        "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Remains.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Remains": remains,
-        "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Herbalist_Shop_2.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Herbalist Shop": herbalistShop,
-        "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Potion_Shop.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Potion Shop": potionShop,
-        "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Blacksmith_Shop.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Blacksmith": blacksmith,
-        "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Artificer_Shop_1.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Artificer": artificer,
-        "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Adventurer_Guild.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Adventurer Guild": adventurerGuild,
-        "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Warrior_Guild.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Warrior Guild": warriorGuild
-    };
-
-    L.control.layers(null, overlayMaps, { "autoZIndex": true, "collapsed": true, "position": "bottomleft" }).addTo(leafletMap);
-
-    leafletMap.on('zoomend', function () {
-        var zoomlevel = leafletMap.getZoom();
-        if (zoomlevel < 5) {
-            if (leafletMap.hasLayer(cities)) {
-                leafletMap.removeLayer(cities);
-            } else {
-                console.log("no point layer active");
-            }
-        }
-        if (zoomlevel >= 5) {
-            if (leafletMap.hasLayer(cities)) {
-                console.log("layer already added");
-            } else {
-                leafletMap.addLayer(cities);
-            }
-        }
-        console.log("Current Zoom Level =" + zoomlevel)
-    });
+    for (let i = 0; i < FreeDrawOut.length; i++) {
+        // for each separated element from the current drawing
+        // create a feature and append to geojson
+        geojson.features.push(FreeDrawOut[i].toGeoJSON())
+    }
+    return JSON.stringify(geojson);
 }

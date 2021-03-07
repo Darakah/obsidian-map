@@ -1,10 +1,10 @@
 {
-	"id": "obsidian-map",
-	"name": "Map",
-	"version": "0.2.0",
-	"minAppVersion": "0.10.11",
-	"description": "Interactive leaflet map to render geo/time tagged notes.",
-	"author": "darakah",
-	"authorUrl": "https://github.com/Darakah/",
-	"isDesktopOnly": false
+    "id": "obsidian-map",
+    "name": "Map",
+    "version": "0.3.0",
+    "minAppVersion": "0.10.11",
+    "description": "Interactive leaflet map to render geo/time tagged notes.",
+    "author": "darakah",
+    "authorUrl": "https://github.com/Darakah/",
+    "isDesktopOnly": false
 }

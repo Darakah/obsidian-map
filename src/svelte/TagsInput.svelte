@@ -26,7 +26,7 @@
         margin-top: 10px;
         padding-left: 10px;
         padding-bottom: 5px;
-        width: 75% !important;
+        width: 65% !important;
         background-color: var(--background-secondary-alt);
         border: none;
         border-radius: 7px;
