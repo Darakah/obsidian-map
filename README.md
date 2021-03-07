@@ -8,6 +8,13 @@ Use leaflet to generate an interactive map with all geo / temporal tagged notes 
 
 ## Release Notes
 
+### v0.4.0
+- Add current `Zoom` layer to settings tab
+- Add ruler control layer with cutom distances 
+- Modify distance measurements for `leaflet-measure` plugin (to custom measurement)
+- Add side bar ribbon and remove show world map command
+- Add font awesome `globe` icon to ribbon
+
 ### v0.3.0
 - Removed side panel map control (https://github.com/Darakah/obsidian-map/issues/8)
 - Added on-map expandable settings tab which contains freeDraw controls cleaning UI (https://github.com/Darakah/obsidian-map/issues/2)
