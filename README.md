@@ -26,7 +26,7 @@ Use leaflet to generate an interactive map with all geo / temporal tagged notes 
 - Added on-map expandable settings tab which contains freeDraw controls cleaning UI (https://github.com/Darakah/obsidian-map/issues/2)
 - Added export option for normal `Draw` plugin (combined into same export based on activation of FreeDraw)
 - Implemented data retrival and display on map 
-- Implemented `Map Paint` plugin / modified (https://github.com/SINTEF-9012/Leaflet.MapPaint)
+- Added `Map Paint` plugin / modified (https://github.com/SINTEF-9012/Leaflet.MapPaint)
 - `Map Paint` images are exported into plugin data and added as additional layers on map load. This allows to expend and add tile layers to base map.
 - Bug Fix: https://github.com/Darakah/obsidian-map/issues/9
 - Bug Fix: https://github.com/Darakah/obsidian-map/issues/7
