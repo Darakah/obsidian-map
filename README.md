@@ -18,3 +18,6 @@ Use leaflet to generate an interactive map with all geo / temporal tagged notes 
 - [ ] Define Zoom level for appearance to each of the categories
 - [ ] Define graphic representation for each of the categories
 - [ ] Add pop-up with information to each of the categories upon interaction
+
+## Support:
+[![Github Sponsorship](https://github.com/Darakah/Darakah/blob/main/icons/github_sponsor_btn.svg)](https://github.com/sponsors/Darakah) [<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="BuyMeACoffee" width="100">](https://www.buymeacoffee.com/darakah)
