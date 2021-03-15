@@ -71,7 +71,7 @@ export class WorldMapView extends ItemView {
             map = L.map('map', {}).setView([14, -1.8], 5);
 
             // Add firt tile layer
-            let baseLayer = L.tileLayer('app://local/Users/gaby/Desktop/Nehlam/Data/Tiles/{z}/{x}/{y}.png', {
+            let baseLayer = L.tileLayer('app://local/Users/Data/Tiles/{z}/{x}/{y}.png', {
                 "attribution": "darakah",
                 "maxNativeZoom": 7,
                 "maxZoom": 10000,
