@@ -14,14 +14,8 @@ export default class WorldMapPlugin extends Plugin {
         await this.loadSettings();
         console.log('Loaded World Map Plugin');
         this.addSettingTab(new MapSettingTab(this.app, this));
-
         this.registerView(VIEW_TYPE_OB_WORLD_MAP, (leaf) => this.view = new WorldMapView(leaf, this));
-
-        this.addCommand({
-            id: "show-world-map-panel",
-            name: "Open World Map Control Panel",
-            callback: () => this.showPanel()
-        });
+        this.addRibbonIcon('<i class="fa fa-map"></i>', "World Map", (e) => this.showPanel()).createEl('i', {cls: "fa fa-globe"});
     }
 
     showPanel = function () {

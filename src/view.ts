@@ -16,7 +16,6 @@ import 'leaflet/dist/leaflet.css';
 import 'font-awesome/css/font-awesome.min.css'
 import MapPaint from '../MapPaint.js'
 import WorldMapPlugin from './main'
-import type { overlayTile, coordBounds } from './types'
 
 var map;
 
@@ -72,7 +71,7 @@ export class WorldMapView extends ItemView {
             map = L.map('map', {}).setView([14, -1.8], 5);
 
             // Add firt tile layer
-            let baseLayer = L.tileLayer('app://local/Users/Data/Tiles/{z}/{x}/{y}.png', {
+            let baseLayer = L.tileLayer('app://local/Users/gaby/Desktop/Nehlam/Data/Tiles/{z}/{x}/{y}.png', {
                 "attribution": "darakah",
                 "maxNativeZoom": 7,
                 "maxZoom": 10000,
@@ -86,9 +85,9 @@ export class WorldMapView extends ItemView {
                 {
                     "position": "topleft",
                     "primaryLengthUnit": "Nu",
-                    "secondaryLengthUnit": "meters",
+                    "secondaryLengthUnit": null,
                     "primaryAreaUnit": "sqNu",
-                    "secondaryAreaUnit": "sqmeters",
+                    "secondaryAreaUnit": null,
                     "activeColor": '#ffcc66',
                     "completedColor": '#ffcc66',
                     units: {
@@ -105,11 +104,12 @@ export class WorldMapView extends ItemView {
                     }
                 });
 
+            L.control.scale().addTo(map);
             L.Control.Scale.include({
                 _updateMetric: function (maxMeters) {
                     maxMeters = maxMeters * 8;
                     var meters = this._getRoundNum(maxMeters),
-                        label = meters < 1000 ? meters + " m" : (meters / 1000) + " km";
+                        label = meters < 1000 ? meters + " Nu" : (meters / 1000) + " KNu";
                     this._updateScale(this._mScale, label, meters / maxMeters);
                 }
             });
@@ -131,54 +131,107 @@ export class WorldMapView extends ItemView {
             });
             measure_control_main.addTo(map);
 
+            let politicalMap = L.tileLayer({
+                "attribution": "darakah",
+                "maxNativeZoom": 7,
+                "maxZoom": 10000,
+                "minZoom": 3,
+                "noWrap": true,
+                "zoomStart": 5
+            })
+
+            let culturalMap = L.tileLayer({
+                "attribution": "darakah",
+                "maxNativeZoom": 7,
+                "maxZoom": 10000,
+                "minZoom": 3,
+                "noWrap": true,
+                "zoomStart": 5
+            })
+
+            let religionMap = L.tileLayer({
+                "attribution": "darakah",
+                "maxNativeZoom": 7,
+                "maxZoom": 10000,
+                "minZoom": 3,
+                "noWrap": true,
+                "zoomStart": 5
+            })
+
+            let provincesMap = L.tileLayer({
+                "attribution": "darakah",
+                "maxNativeZoom": 7,
+                "maxZoom": 10000,
+                "minZoom": 3,
+                "noWrap": true,
+                "zoomStart": 5
+            })
+
+            let biomassMap = L.tileLayer({
+                "attribution": "darakah",
+                "maxNativeZoom": 7,
+                "maxZoom": 10000,
+                "minZoom": 3,
+                "noWrap": true,
+                "zoomStart": 5
+            })
+
+            let heightMap = L.tileLayer({
+                "attribution": "darakah",
+                "maxNativeZoom": 7,
+                "maxZoom": 10000,
+                "minZoom": 3,
+                "noWrap": true,
+                "zoomStart": 5
+            })
+
+            let citiesMap = L.tileLayer({
+                "attribution": "darakah",
+                "maxNativeZoom": 7,
+                "maxZoom": 10000,
+                "minZoom": 3,
+                "noWrap": true,
+                "zoomStart": 5
+            })
+
+
+
             // Add feature groups
             let cities = L.layerGroup();
-            let dungeons = L.featureGroup({});
-            let assassinGuild = L.featureGroup({});
-            let magicalForest = L.featureGroup({});
-            let remains = L.featureGroup({});
-            let herbalistShop = L.featureGroup({});
-            let potionShop = L.featureGroup({});
-            let blacksmith = L.featureGroup({});
-            let artificer = L.featureGroup({});
+            let households = L.featureGroup({});
+            let borders = L.featureGroup({});
+            let mainRoads = L.featureGroup({});
+            let secondaryRoads = L.featureGroup({});
+            let waterways = L.featureGroup({});
+            let airways = L.featureGroup({});
+            let military = L.featureGroup({});
+            let rivers = L.featureGroup({});
             let adventurerGuild = L.featureGroup({});
             let warriorGuild = L.featureGroup({});
 
+            let layersMaps = {
+                "Base": baseLayer,
+                "Political": politicalMap,
+                "Cultural": culturalMap,
+                "Religion": religionMap,
+                "Biomass": biomassMap,
+                "Height": heightMap,
+                "Cities": citiesMap
+            }
+
             let overlayMaps = {
                 "Cities": cities,
-                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Dungeon.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Dungeon": dungeons,
-                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Assassins_Guild.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Assassin Guild": assassinGuild,
-                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Magical_Forest.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Magical Forest": magicalForest,
-                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Remains.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Remains": remains,
-                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Herbalist_Shop_2.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Herbalist Shop": herbalistShop,
-                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Potion_Shop.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Potion Shop": potionShop,
-                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Blacksmith_Shop.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Blacksmith": blacksmith,
-                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Artificer_Shop_1.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Artificer": artificer,
-                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Adventurer_Guild.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Adventurer Guild": adventurerGuild,
-                "\u003cdiv style=\u0027position: relative; display: inline-block; width: 30px !important; height: 30px\u0027\u003e\u003cimg src=\u0027app://local/Users/gaby/Desktop/Nehlam/Resources/Images/Layer_Warrior_Guild.jpg\u0027width=25px height=25px /\u003e\u003c/div\u003e Warrior Guild": warriorGuild
+                "Households": households,
+                "Borders": borders,
+                "Main Roads": mainRoads,
+                "Secondary Roads": secondaryRoads,
+                "Waterways": waterways,
+                "Airways": airways,
+                "Military": military,
+                "Rivers": rivers
             };
 
-            L.control.layers(null, overlayMaps, { "autoZIndex": true, "collapsed": true, "position": "bottomleft" }).addTo(map);
-
-
-            map.on('zoomend', function () {
-                var zoomlevel = map.getZoom();
-                if (zoomlevel < 5) {
-                    if (map.hasLayer(cities)) {
-                        map.removeLayer(cities);
-                    } else {
-                        console.log("no point layer active");
-                    }
-                }
-                if (zoomlevel >= 5) {
-                    if (map.hasLayer(cities)) {
-                        console.log("layer already added");
-                    } else {
-                        map.addLayer(cities);
-                    }
-                }
-                console.log("Current Zoom Level =" + zoomlevel)
-            });
+            L.control.layers(layersMaps, overlayMaps, { "autoZIndex": true, "collapsed": true, "position": "bottomleft" }).addTo(map);
 
             // Create Map Control Panel
             let controlPanel = document.createElement('div')
@@ -306,19 +359,29 @@ export class WorldMapView extends ItemView {
                 let northEast = bounds.getNorthEast();
                 let southWest = bounds.getSouthWest();
 
-                let drawData = {
-                    image: image,
-                    bounds: { northEast: northEast, southWest: southWest },
-                    zoom: parseInt(map.getZoom())
-                }
-
-                this.plugin.settings.overlayData.push(drawData)
-                this.plugin.saveSettings()
-
-                L.imageOverlay(image, [[northEast.lat, northEast.lng], [southWest.lat, southWest.lng]]).addTo(map);
-
+                FileSaver.saveAs(image, `Layer_TimeStart_TimeEnd_${map.getZoom()}_${northEast.lat}_${northEast.lng}_${southWest.lat}_${southWest.lng}.png`);
+                //L.imageOverlay(image, [[northEast.lat, northEast.lng], [southWest.lat, southWest.lng]]).addTo(map);
             }
 
+            // Zoom control of layer display
+            // get Zoom display element from map control
+            let zoomEl = controlPanel.getElementsByClassName("ob-control-panel-zoom")[0]
+
+            map.on('zoomend', function () {
+                let zoomlevel = map.getZoom();
+                zoomEl.setText(`${zoomlevel}`)
+
+                if (zoomlevel < 5) {
+                    if (map.hasLayer(cities)) {
+                        map.removeLayer(cities);
+                    }
+                }
+                if (zoomlevel >= 5) {
+                    if (!map.hasLayer(cities)) {
+                        map.addLayer(cities);
+                    }
+                }
+            });
         }
     }
 }
