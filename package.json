@@ -31,7 +31,6 @@
         "leaflet-draw": "^1.0.4",
         "leaflet-freedraw": "^2.13.3",
         "leaflet-measure": "^3.1.0",
-        "leaflet-panel-layers": "^1.2.6",
         "leaflet.awesome-markers": "^2.0.5",
         "leaflet.styledlayercontrol": "^1.0.0",
         "rollup-plugin-svelte": "^7.1.0",
