@@ -8,9 +8,36 @@ Use leaflet to generate an interactive map with all geo / temporal tagged notes 
 
 ![example_4](https://raw.githubusercontent.com/Darakah/obsidian-map/main/images/Example_4.png)
 
-![example_5](https://raw.githubusercontent.com/Darakah/obsidian-map/main/images/Example_5.png)
-
 ## Release Notes
+
+### v0.5.0
+- New Geo/Temporal Map Data Structure for much faster Search & Display
+- Implemented Overlay Tiles reading & Display
+- Implemented Obsidian Notes Geo/Temporal data reading & Display
+- Added Styled Controle Layer (https://github.com/davicustodio/Leaflet.StyledLayerControl) to organize Map Controls
+- Linked Overlay Tiles to obsidian notes
+- Interactive Overlay Tiles (e.g. political overlays)
+- Changed year / tag filtering 
+- Added Info display div (to display obsidian note linked to each map info)
+- Disabled map navigation when inside Info div & Control Pannel div
+- Added note Geo/Temporal block info:
+
+```html
+<span class="ob-world-map" 
+	  data-type="Capital"
+	  data-loc="9.380052 / 9.969492"
+	  data-dateStart="20"
+	  data-dateEnd="90"
+	  data-icon="map-marked-alt"
+	  data-color="red"
+	  data-marker='<img class="map-custom-marker-img" src="app://local/Users/Resources/Icon/Layer_Potion_Shop.png"/>'/>
+```
+
+- Added support for Font awesome markers (https://github.com/lvoogdt/Leaflet.awesome-markers)
+- Added support for custom markers specified using `data-marker`
+- Added obsidian Settings tab
+- Ability to change tile / base tiles path through settings tab
+- Ability to Add / Remove new Map Overlay & Marker groups using the settings tab
 
 ### v0.4.0
 - Add current `Zoom` layer to settings tab
