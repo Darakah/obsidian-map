@@ -4,6 +4,8 @@ Use leaflet to generate an interactive map with all geo / temporal tagged notes 
 
 ## Example
 
+![example_6](https://raw.githubusercontent.com/Darakah/obsidian-map/main/images/Example_6.png)
+
 ![example_4](https://raw.githubusercontent.com/Darakah/obsidian-map/main/images/Example_4.png)
 
 ![example_5](https://raw.githubusercontent.com/Darakah/obsidian-map/main/images/Example_5.png)
