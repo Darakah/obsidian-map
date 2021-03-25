@@ -1,21 +1,22 @@
 import { ItemView, WorkspaceLeaf } from 'obsidian';
-import MapControlButton from './svelte/MapControlButton.svelte'
-import { convertToGeojson, updateMap } from './utils'
-import { VIEW_TYPE_OB_WORLD_MAP } from './constants'
-import type { LatLng } from "leaflet";
-import L from 'leaflet'
+import MapControlButton from './svelte/MapControlButton.svelte';
+import { convertToGeojson, updateMap } from './utils';
+import { VIEW_TYPE_OB_WORLD_MAP } from './constants';
+import L from 'leaflet';
 
-import Freedraw, { CREATE, EDIT, NONE } from 'leaflet-freedraw';
+import Freedraw, { NONE } from 'leaflet-freedraw';
 import FileSaver from 'file-saver';
 import 'leaflet-measure';
-import 'leaflet-measure/dist/leaflet-measure.css'
+import 'leaflet-measure/dist/leaflet-measure.css';
 import 'leaflet-draw';
-import 'leaflet-draw/dist/leaflet.draw.css'
-import 'leaflet-draw/dist/leaflet.draw-src.css'
+import 'leaflet-draw/dist/leaflet.draw.css';
+import 'leaflet-draw/dist/leaflet.draw-src.css';
 import 'leaflet/dist/leaflet.css';
-import 'font-awesome/css/font-awesome.min.css'
-import MapPaint from '../MapPaint.js'
-import WorldMapPlugin from './main'
+import 'font-awesome/css/font-awesome.min.css';
+import 'leaflet.styledlayercontrol/css/styledLayerControl.css';
+import 'leaflet.styledlayercontrol/src/styledLayerControl.js';
+import MapPaint from '../MapPaint.js';
+import WorldMapPlugin from './main';
 
 var map;
 
@@ -52,8 +53,9 @@ export class WorldMapView extends ItemView {
     async redraw() {
 
         // Create div with map element
-        this.containerEl.createDiv({ cls: 'map', attr: { id: 'map' } })
+        this.containerEl.createDiv({ cls: 'map', attr: { id: 'map' } });
         let mapEl = document.getElementsByClassName('map');
+        let adaptor = this.app.vault.adapter;
 
         // Verify if map element available
         if (mapEl[0]) {
@@ -64,14 +66,14 @@ export class WorldMapView extends ItemView {
                     id: 'map',
                     style: 'position:absolute; top:0px; right:0px; height:100%; width:100%;'
                 }
-            })
-            mapEl[0].setAttribute('style', 'position:absolute; top:0px; right:0px; height:100%; width:100%;')
+            });
+            mapEl[0].setAttribute('style', 'position:absolute; top:0px; right:0px; height:100%; width:100%;');
 
             // Create the map and set view to center on default zoom
             map = L.map('map', {}).setView([14, -1.8], 5);
 
             // Add firt tile layer
-            let baseLayer = L.tileLayer('app://local/Users/Data/Tiles/{z}/{x}/{y}.png', {
+            let baseLayer = L.tileLayer(this.plugin.settings.mapTilesPath, {
                 "attribution": "darakah",
                 "maxNativeZoom": 7,
                 "maxZoom": 10000,
@@ -131,117 +133,69 @@ export class WorldMapView extends ItemView {
             });
             measure_control_main.addTo(map);
 
-            let politicalMap = L.tileLayer({
-                "attribution": "darakah",
-                "maxNativeZoom": 7,
-                "maxZoom": 10000,
-                "minZoom": 3,
-                "noWrap": true,
-                "zoomStart": 5
-            })
-
-            let culturalMap = L.tileLayer({
-                "attribution": "darakah",
-                "maxNativeZoom": 7,
-                "maxZoom": 10000,
-                "minZoom": 3,
-                "noWrap": true,
-                "zoomStart": 5
-            })
-
-            let religionMap = L.tileLayer({
-                "attribution": "darakah",
-                "maxNativeZoom": 7,
-                "maxZoom": 10000,
-                "minZoom": 3,
-                "noWrap": true,
-                "zoomStart": 5
-            })
-
-            let provincesMap = L.tileLayer({
-                "attribution": "darakah",
-                "maxNativeZoom": 7,
-                "maxZoom": 10000,
-                "minZoom": 3,
-                "noWrap": true,
-                "zoomStart": 5
-            })
-
-            let biomassMap = L.tileLayer({
-                "attribution": "darakah",
-                "maxNativeZoom": 7,
-                "maxZoom": 10000,
-                "minZoom": 3,
-                "noWrap": true,
-                "zoomStart": 5
-            })
-
-            let heightMap = L.tileLayer({
-                "attribution": "darakah",
-                "maxNativeZoom": 7,
-                "maxZoom": 10000,
-                "minZoom": 3,
-                "noWrap": true,
-                "zoomStart": 5
-            })
-
-            let citiesMap = L.tileLayer({
-                "attribution": "darakah",
-                "maxNativeZoom": 7,
-                "maxZoom": 10000,
-                "minZoom": 3,
-                "noWrap": true,
-                "zoomStart": 5
-            })
-
-
-
             // Add feature groups
-            let cities = L.layerGroup();
-            let households = L.featureGroup({});
-            let borders = L.featureGroup({});
-            let mainRoads = L.featureGroup({});
-            let secondaryRoads = L.featureGroup({});
-            let waterways = L.featureGroup({});
-            let airways = L.featureGroup({});
-            let military = L.featureGroup({});
-            let rivers = L.featureGroup({});
-            let adventurerGuild = L.featureGroup({});
-            let warriorGuild = L.featureGroup({});
+            let overlayActive = {};
+            this.plugin.settings.tileLayersActive.forEach(layer => {
+                overlayActive[layer] = L.featureGroup({});
+            })
 
-            let layersMaps = {
-                "Base": baseLayer,
-                "Political": politicalMap,
-                "Cultural": culturalMap,
-                "Religion": religionMap,
-                "Biomass": biomassMap,
-                "Height": heightMap,
-                "Cities": citiesMap
-            }
+            let overlayMarkers = {};
+            this.plugin.settings.markerLayers.forEach(layer => {
+                overlayMarkers[layer] = L.featureGroup({});
+            })
 
-            let overlayMaps = {
-                "Cities": cities,
-                "Households": households,
-                "Borders": borders,
-                "Main Roads": mainRoads,
-                "Secondary Roads": secondaryRoads,
-                "Waterways": waterways,
-                "Airways": airways,
-                "Military": military,
-                "Rivers": rivers
+            let overlay = {};
+            this.plugin.settings.tileLayers.forEach(layer => {
+                overlay[layer] = L.featureGroup({});
+            })
+
+            let allOverlays = Object.assign({}, overlay, overlayActive, overlayMarkers);
+
+            let baseLayers = [
+                {
+                    groupName: "Base Map",
+                    expanded: false,
+                    layers: {
+                        "Base": baseLayer
+                    }
+                }
+            ];
+
+            let overlayLayers = [
+                {
+                    groupName: "Overlays",
+                    expanded: true,
+                    layers: overlay
+                },
+                {
+                    groupName: "Overlays Active",
+                    expanded: true,
+                    layers: overlayActive
+                }, {
+                    groupName: "Markers",
+                    expanded: false,
+                    layers: overlayMarkers
+                }
+            ];
+
+
+            let controlOptions = {
+                position: "bottomleft",
+                className: 'test'
             };
 
-            L.control.layers(layersMaps, overlayMaps, { "autoZIndex": true, "collapsed": true, "position": "bottomleft" }).addTo(map);
+            let controlNew = L.Control.styledLayerControl(baseLayers, overlayLayers, controlOptions);
+            map.addControl(controlNew);
 
             // Create Map Control Panel
-            let controlPanel = document.createElement('div')
-            controlPanel.addClass('WorldMapControl')
-            controlPanel.setAttribute('id', 'WorldMapControl')
-            controlPanel.setAttribute('style', '')
+            let controlPanel = document.createElement('div');
+            controlPanel.addClass('WorldMapControl');
+            controlPanel.setAttribute('id', 'WorldMapControl');
+            controlPanel.setAttribute('style', '');
 
             new MapControlButton({
                 target: controlPanel
-            })
+            });
 
             let mapControl = L.control({ position: 'topright' });
             mapControl.onAdd = function (map) {
@@ -249,9 +203,22 @@ export class WorldMapView extends ItemView {
             };
 
             // Add Listener to filter button to update map data
-            let updateButtonEl = controlPanel.getElementsByClassName('ob-world-map-update-button')[0]
+            let updateButtonEl = controlPanel.getElementsByClassName('ob-world-map-update-button')[0];
             updateButtonEl.addEventListener("click", event => {
-                updateMap(this.app.vault.getMarkdownFiles(), this.app.metadataCache, this.app.vault, map, overlayMaps)
+                updateMap(this, this.plugin.settings.mapData, this.app.vault, map, allOverlays, this.plugin.settings);
+            });
+
+            // Disable map control inside settings div
+            controlPanel.addEventListener('mouseover', function () {
+                map.dragging.disable();
+                map.scrollWheelZoom.disable();
+                map.doubleClickZoom.disable();
+            });
+
+            controlPanel.addEventListener('mouseout', function () {
+                map.dragging.enable();
+                map.scrollWheelZoom.enable();
+                map.doubleClickZoom.enable();
             });
 
             // Add freeDraw plugin
@@ -261,11 +228,11 @@ export class WorldMapView extends ItemView {
             // Listeners to control freDraw states
             controlPanel.getElementsByClassName("FreeDrawControl")[0].addEventListener("click", () => {
                 if (freeDraw.mode() === 0) {
-                    map.addLayer(freeDraw)
+                    map.addLayer(freeDraw);
                     freeDraw.mode(15);
                 } else {
-                    freeDraw.mode(0)
-                    map.removeLayer(freeDraw)
+                    freeDraw.mode(0);
+                    map.removeLayer(freeDraw);
                 }
             });
 
@@ -277,7 +244,7 @@ export class WorldMapView extends ItemView {
                 if (freeDraw.mode() === 15) {
                     freeDraw.mode(2);
                 } else {
-                    freeDraw.mode(15)
+                    freeDraw.mode(15);
                 }
             });
 
@@ -298,7 +265,7 @@ export class WorldMapView extends ItemView {
                     "poly": { "allowIntersection": true },
                     "featureGroup": L.featureGroup(),
                 },
-            }
+            };
 
             let drawnItems = new L.featureGroup().addTo(
                 map
@@ -314,7 +281,6 @@ export class WorldMapView extends ItemView {
                 let coords = JSON.stringify(layer.toGeoJSON());
                 layer.on('click', function () {
                     alert(coords);
-                    console.log(coords);
                 });
                 drawnItems.addLayer(layer);
             });
@@ -332,7 +298,6 @@ export class WorldMapView extends ItemView {
                     let data = drawnItems.toGeoJSON();
                     let convertedData = 'text/json;charset=utf-8,'
                         + encodeURIComponent(JSON.stringify(data));
-                    console.log(convertedData);
                     document.getElementById('exportGeo').setAttribute(
                         'href', 'data:' + convertedData
                     );
@@ -340,19 +305,13 @@ export class WorldMapView extends ItemView {
                         'download', "my_data.geojson"
                     );
                 }
-            }
+            };
 
             mapControl.addTo(map);
 
             // Add leaflet Map Paint plugin
-            let mapPaint = new MapPaint.SwitchControl({ position: 'topleft' })
+            let mapPaint = new MapPaint.SwitchControl({ position: 'topleft' });
             map.addControl(mapPaint);
-
-            for (let i = 0; i < this.plugin.settings.overlayData.length; i++) {
-                let coord = this.plugin.settings.overlayData[i].bounds;
-                L.imageOverlay(this.plugin.settings.overlayData[i].image,
-                    [[coord.northEast.lat, coord.northEast.lng], [coord.southWest.lat, coord.southWest.lng]]).addTo(map);
-            }
 
             map.MapPaint.saveMethod = (image: string, bounds) => {
 
@@ -360,28 +319,32 @@ export class WorldMapView extends ItemView {
                 let southWest = bounds.getSouthWest();
 
                 FileSaver.saveAs(image, `Layer_TimeStart_TimeEnd_${map.getZoom()}_${northEast.lat}_${northEast.lng}_${southWest.lat}_${southWest.lng}.png`);
-                //L.imageOverlay(image, [[northEast.lat, northEast.lng], [southWest.lat, southWest.lng]]).addTo(map);
-            }
+            };
+
+            L.DomEvent.stopPropagation(document.getElementById('WorldMapControl'));
+            L.DomEvent.preventDefault(document.getElementById('WorldMapControl'));
+
 
             // Zoom control of layer display
             // get Zoom display element from map control
-            let zoomEl = controlPanel.getElementsByClassName("ob-control-panel-zoom")[0]
+            let zoomEl = controlPanel.getElementsByClassName("ob-control-panel-zoom")[0];
 
             map.on('zoomend', function () {
                 let zoomlevel = map.getZoom();
-                zoomEl.setText(`${zoomlevel}`)
-
-                if (zoomlevel < 5) {
-                    if (map.hasLayer(cities)) {
-                        map.removeLayer(cities);
-                    }
-                }
-                if (zoomlevel >= 5) {
-                    if (!map.hasLayer(cities)) {
-                        map.addLayer(cities);
-                    }
-                }
+                zoomEl.setText(`${zoomlevel}`);
             });
+
+            // Add info block to leaflet map
+            let info = L.control({ position: 'topright' });
+            info.onAdd = function (map) {
+                let div = L.DomUtil.create('div', 'world-map-info');
+                div.innerHTML = ('');
+                div.addEventListener('click', event => {
+                    div.style.setProperty('display', 'none');
+                });
+                return div;
+            };
+            info.addTo(map);
         }
     }
 }

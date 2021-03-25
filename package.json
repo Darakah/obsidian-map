@@ -1,6 +1,6 @@
 {
     "name": "Map",
-    "version": "0.3.0",
+    "version": "0.5.0",
     "description": "Interactive leaflet map to render geo/time tagged notes.",
     "main": "./src/main.js",
     "scripts": {
@@ -23,6 +23,7 @@
         "typescript": "^4.0.3"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-free": "^5.15.3",
         "file-saver": "^2.0.5",
         "font-awesome": "^4.7.0",
         "geojson": "^0.5.0",
@@ -30,6 +31,9 @@
         "leaflet-draw": "^1.0.4",
         "leaflet-freedraw": "^2.13.3",
         "leaflet-measure": "^3.1.0",
+        "leaflet-panel-layers": "^1.2.6",
+        "leaflet.awesome-markers": "^2.0.5",
+        "leaflet.styledlayercontrol": "^1.0.0",
         "rollup-plugin-svelte": "^7.1.0",
         "svelte-preprocess": "^4.6.9",
         "svelte-range-slider-pips": "^1.7.0"

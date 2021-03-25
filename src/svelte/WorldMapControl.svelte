@@ -2,6 +2,7 @@
     import TagsInput from "./TagsInput.svelte";
     import TypeInput from "./TypeInput.svelte";
     import Timeline from "./Timeline.svelte";
+    import YearInput from "./YearInput.svelte";
 </script>
 
 <div
@@ -13,7 +14,7 @@
             id="FreeDrawControl"
             type="checkbox"
         />
-        <i class="fa fa-pencil" style="font-size: 1.8em;" />
+        <i class="fas fa-pencil-alt" style="font-size: 1.8em;" />
         <input
             class="leaflet-control-layers-overlays freeEdit"
             id="freeEdit"
@@ -29,6 +30,10 @@
 </div>
 
 <TagsInput />
+
+<br />
+
+<YearInput />
 
 <br />
 
@@ -52,6 +57,7 @@
         background-color: var(--background-primary-alt);
         border: none;
         margin-top: 10px;
+        background: transparent !important;
     }
 
     .ob-control-panel-zoom {
