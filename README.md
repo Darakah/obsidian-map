@@ -30,7 +30,8 @@ Use leaflet to generate an interactive map with all geo / temporal tagged notes 
 	  data-dateEnd="90"
 	  data-icon="map-marked-alt"
 	  data-color="red"
-	  data-marker='<img class="map-custom-marker-img" src="app://local/Users/Resources/Icon/Layer_Potion_Shop.png"/>'/>
+	  data-marker='<img class="map-custom-marker-img" 
+		       src="app://local/Users/Resources/Icon/Layer_Potion_Shop.png"/>'/>
 ```
 
 - Added support for Font awesome markers (https://github.com/lvoogdt/Leaflet.awesome-markers)
