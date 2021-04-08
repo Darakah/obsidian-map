@@ -1,4 +1,6 @@
 # obsidian-map
+![GitHub release)](https://img.shields.io/github/v/release/Darakah/obsidian-map)
+![GitHub all releases](https://img.shields.io/github/downloads/Darakah/obsidian-map/total)
 
 Use leaflet to generate an interactive map with all geo / temporal tagged notes linked and displayed on the map 
 
